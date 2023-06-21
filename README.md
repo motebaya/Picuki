@@ -39,17 +39,16 @@ python main.py
  python main.py -u johndoe -i -v 
  ````
 
-### Preview:
- - Images
+- Images
 
     ![](src/image-downloading.png)
 
- - videos
- 
-    ![](src/video-downloading.png)
+- videos
 
- - result show
- 
+     ![](src/video-downloading.png)
+
+- result show
+
     ![](src/result.png)
 
 ## License
