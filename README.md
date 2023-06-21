@@ -33,6 +33,9 @@ python main.py
  - `-t`, `--thumbnails`: only download all thumbnails
  - `-a`, `--all`: download all media post from profile
  - `-V`, `--verbose`: enable debug mode
+
+  output download saved in `./<username>/<images/videos/thumbnails>`
+
  ----
  + Set multiple arg for multiple choice e.g:
  ```
