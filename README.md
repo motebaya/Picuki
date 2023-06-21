@@ -49,7 +49,7 @@ python main.py
 
 - result show
 
-    ![](src/result.png)
+    ![](src/result-show.png)
 
 ## License
 
