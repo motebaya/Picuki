@@ -35,6 +35,13 @@ def get_valid_filename(url: str) -> str:
         random.shuffle(basename)
         basename = "".join(basename)
         return basename
+        # if (ext := re.search(r'(?P<ext>\.(?:jpeg|jpg|png|mp4))', url)):
+            # extension = ext.groupdict().get('ext')
+            # return f"{basename}{extension}"
+        # logger.warning(f"Can't find spesific ext from: {url}")
+        # raise ValueError(
+            # 'invalid url'
+        # )
     logger.warning(f"Cannot find spesific name from url: {url}")
     raise ValueError(
         "invalid url"
@@ -89,7 +96,7 @@ async def _download(**kwargs: Dict[str, str]) -> None:
                     f"Cannot get mimetype of content: {url}"
                 )
 
-            filename = filename + extension.split('/')[-1]
+            filename = "{}.{}".format(filename + extension.split('/')[-1])
             if not os.path.exists(filename):
                 async with aiofiles.open(filename, "wb") as f:
                     with Progress(
