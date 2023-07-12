@@ -15,7 +15,7 @@ from ssl import SSLWantReadError
 from aiohttp import ClientSession
 from pathlib import Path as PosixPath
 from humanize import naturalsize as get_natural_sizes
-import aiofiles, asyncio, os, re, random
+import aiofiles, asyncio, os, re, random, time
 from rich.progress import (
     Progress, 
     SpinnerColumn, 
@@ -34,13 +34,7 @@ def get_valid_filename(url: str) -> str:
         basename = list(basename.groupdict().get('filename')[:25])
         random.shuffle(basename)
         basename = "".join(basename)
-        if (ext := re.search(r'(?P<ext>\.(?:jpeg|jpg|png|mp4))', url)):
-            extension = ext.groupdict().get('ext')
-            return f"{basename}{extension}"
-        logger.warning(f"Can't find spesific ext from: {url}")
-        raise ValueError(
-            'invalid url'
-        )
+        return basename
     logger.warning(f"Cannot find spesific name from url: {url}")
     raise ValueError(
         "invalid url"
@@ -65,7 +59,7 @@ async def _download(**kwargs: Dict[str, str]) -> None:
         'username',
         'picuki_media'
     ))
-    
+
     if not os.path.exists(output):
         try:
             os.mkdir(output)
@@ -89,33 +83,43 @@ async def _download(**kwargs: Dict[str, str]) -> None:
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
         }) as session:
         async with session.get(url) as response:
-            async with aiofiles.open(filename, "wb") as f:
-                with Progress(
-                    SpinnerColumn(speed=1.5),
-                    TextColumn("[green] Downloading..", justify="right"),
-                    BarColumn(),
-                    "[progress.percentage]{task.percentage:>3.0f}%",
-                    DownloadColumn(
-                        binary_units=False
-                    ),
-                    TransferSpeedColumn(),
-                    TimeRemainingColumn(),
-                    console=Console(),
-                    transient=True
-                ) as progress:
-                    task = progress.add_task(
-                        "[green] Downloading..", total=int(response.headers.get('content-length', 0))
-                    )
-                    async for content in response.content.iter_chunks():
-                        await f.write(
-                            content[0]
+            extension = response.headers.get('Content-Type')
+            if not extension:
+                raise ValueError(
+                    f"Cannot get mimetype of content: {url}"
+                )
+
+            filename = filename + extension.split('/')[-1]
+            if not os.path.exists(filename):
+                async with aiofiles.open(filename, "wb") as f:
+                    with Progress(
+                        SpinnerColumn(speed=1.5),
+                        TextColumn("[green] Downloading..", justify="right"),
+                        BarColumn(),
+                        "[progress.percentage]{task.percentage:>3.0f}%",
+                        DownloadColumn(
+                            binary_units=False
+                        ),
+                        TransferSpeedColumn(),
+                        TimeRemainingColumn(),
+                        console=Console(),
+                        transient=True
+                    ) as progress:
+                        task = progress.add_task(
+                            "[green] Downloading..", total=int(response.headers.get('content-length', 0))
                         )
-                        progress.update(
-                            task, advance=len(content[0])
-                        )
-                    await f.close()
-                    progress.stop()
-            Console().print(f"[green] Completed..saved as: [blue]{filename}")
+                        async for content in response.content.iter_chunks():
+                            await f.write(
+                                content[0]
+                            )
+                            progress.update(
+                                task, advance=len(content[0])
+                            )
+                        await f.close()
+                        progress.stop()
+                Console().print(f"[green] Completed..saved as: [blue]{filename}")
+            else:
+                Console().print(f"[green] SKipping.. [blue]{filename} [green] file exist!")
 
 def show_table(data: Dict[str, str], title: str = None) -> None:
     """
@@ -189,22 +193,21 @@ async def _main(**kwargs):
                     select
                 )
 
-    try:
-        if (profile := await module.get_profile(username)):
-            page, result = profile
-            show_table(result)
+    if (profile := await module.get_profile(username)):
+        page, result = profile
+        show_table(result)
 
-            await module.get_media_id(page, logger)
-            if len(module.media_id) != 0:
-                logger.info(f"Total Media Collected: {len(module.media_id)}")
-                logger.info(f"Selected media: {selected}, starting download..")
-                for index, media in enumerate(module.media_id, 1):
-                    logger.info(f"getting content from: {media} [{index} of {len(module.media_id)}]")
-                   
+        await module.get_media_id(page, logger)
+        if len(module.media_id) != 0:
+            logger.info(f"Total Media Collected: {len(module.media_id)}")
+            logger.info(f"Selected media: {selected}, starting download..")
+            for index, media in enumerate(module.media_id, 1):
+                logger.info(f"getting content from: {media} [{index} of {len(module.media_id)}]")
+                try:
                     if (content := await module.get_media_content(media)):
                         _media = content.pop('media')
                         show_table(content)
-                        
+                    
                         if 'images' in selected:
                             if len(_media['images']) != 0:
                                 logger.info(f"Total images collected: {len(_media.get('images'))}")
@@ -240,18 +243,20 @@ async def _main(**kwargs):
                                         )
                             else:
                                 logger.warning("there's no videos or thumbnails to download..")
+                        time.sleep(1)
                     else:
                         logger.warning(f"cannot get content from media ID: {media}")
-                calculate_result(
-                    username
-                )
-            else:
-                logger.warning(f"The user: {profile.get('username')} don't have any post..")
+                except (asyncio.exceptions.CancelledError, SSLWantReadError) as e:
+                    logger.warning(f"Exception: {str(e)}, in media ID: {media}")
+                    time.sleep(1)
+                    continue
+            calculate_result(
+                username
+            )
         else:
-            logger.warning(f"cannot find user: @{username}, check again username")
-    except (asyncio.exceptions.CancelledError, SSLWantReadError) as e:
-        logging.warning(f"Exception with: {str(e)}, exiting...")
-        return
+            logger.warning(f"The user: {profile.get('username')} don't have any post..")
+    else:
+        logger.warning(f"cannot find user: @{username}, check again username")
 
 
 if __name__ == "__main__":
@@ -271,9 +276,12 @@ if __name__ == "__main__":
     
     if args.username and \
         any([args.images, args.videos, args.thumbnails, args.all, args.verbose]):
-        asyncio.run(_main(
-            **vars(args)
-        ))
+        try:
+            asyncio.run(_main(
+                **vars(args)
+            ))
+        except (asyncio.exceptions.CancelledError, SSLWantReadError) as e:
+            logger.warning(f"Exception: {str(e)}")
     else:
         parser.print_help()
     
