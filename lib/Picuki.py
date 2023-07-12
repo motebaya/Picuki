@@ -118,7 +118,6 @@ class Picuki(AsyncClient):
             media_id
         ))
         page = page.text
-        open('zuk.html','w').write(page)
         """
         search: [username, time, caption, tags]
         """
