@@ -96,7 +96,7 @@ async def _download(**kwargs: Dict[str, str]) -> None:
                     f"Cannot get mimetype of content: {url}"
                 )
 
-            filename = "{}.{}".format(filename + extension.split('/')[-1])
+            filename = "{}.{}".format(filename, extension.split('/')[-1])
             if not os.path.exists(filename):
                 async with aiofiles.open(filename, "wb") as f:
                     with Progress(
