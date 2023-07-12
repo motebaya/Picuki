@@ -118,6 +118,7 @@ class Picuki(AsyncClient):
             media_id
         ))
         page = page.text
+        open('zuk.html','w').write(page)
         """
         search: [username, time, caption, tags]
         """
@@ -169,7 +170,7 @@ class Picuki(AsyncClient):
         )):
             for vid in html_video:
                 if (video := re.search(
-                    r"(?:\<video[^\"]poster\=\"(?P<thumbnail>[^<]*?)\"[\s\S].+?src\=\"(?P<url>[^<]*?))\"", vid
+                    r"(?:\<video[^>]+?poster\=\"(?P<thumbnail>[^<]*?)\"[\s\S]*src\=\"(?P<url>[^<]*?))\"", vid
                 )):
                     video_list.append(
                         video.groupdict()
@@ -208,7 +209,7 @@ class Picuki(AsyncClient):
                 for vid in html_video:
                     video_data = {
                         "thumbnail": vid.attrs.get('poster'),
-                        "url": vid.attrs.get('src')
+                        "url": vid.find('source').attrs.get('src')
                     }
                     if video_data not in video_list:
                         video_list.append(
