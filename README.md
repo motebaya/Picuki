@@ -1,8 +1,9 @@
 <div align="center">
     <h2>Picuki</h2>
 
------- 
-Instagram bulk profile media downloader 
+---
+
+Instagram bulk profile media downloader
 
 [![python](https://img.shields.io/badge/python-3.10.6-blue?logo=python&logoColor=yellow)](https://www.python.org/downloads/release/python-3100/)
 [![Scraper](https://img.shields.io/badge/page-scrapper-blue?logo=strapi&logoColor=blue)](https://example.com)
@@ -13,12 +14,16 @@ Instagram bulk profile media downloader
 </div>
 
 ### TODO
- - [x] download all images
- - [x] download all videos
- - [x] download all thumbnails
- - [x] simple profile viewer 
+
+- [x] download all images
+- [x] download all videos
+- [x] download all thumbnails
+- [x] simple profile viewer
+
+note: all content are saved with unique string names.
 
 ### install this
+
 ```
 git clone https://github.com/motebaya/Picuki
 cd Picuki
@@ -27,32 +32,35 @@ python main.py
 ```
 
 ### CLI usage
- - `-u`, `--username`: spesific instagram username
- - `-i`, `--images`: only download all images
- - `-v`, `--videos`: only download all videos
- - `-t`, `--thumbnails`: only download all thumbnails
- - `-a`, `--all`: download all media post from profile
- - `-V`, `--verbose`: enable debug mode
 
-  output download saved in `./<username>/<images/videos/thumbnails>`
+- `-u`, `--username`: spesific instagram username
+- `-i`, `--images`: only download all images
+- `-v`, `--videos`: only download all videos
+- `-t`, `--thumbnails`: only download all thumbnails
+- `-a`, `--all`: download all media post from profile
+- `-V`, `--verbose`: enable debug mode
 
- ----
- + Set multiple arg for multiple choice e.g:
- ```
- python main.py -u johndoe -i -v 
- ````
+output download saved in `./<username>/<images/videos/thumbnails>`
+
+---
+
+- Set multiple arg for multiple choice e.g:
+
+```
+python main.py -u johndoe -i -v
+```
 
 - Images
 
-    ![](src/image-downloading.png)
+  ![](src/image-downloading.png)
 
 - videos
 
-     ![](src/video-downloading.png)
+  ![](src/video-downloading.png)
 
 - result show
 
-    ![](src/result-show.png)
+  ![](src/result-show.png)
 
 ## License
 
