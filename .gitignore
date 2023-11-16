@@ -9,6 +9,7 @@ Users/
 # my useless thing while develop
 trash/
 *.txt
+*.json
 
 # C extensions
 *.so
