@@ -3,6 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Users output
+Users/
+
+# my useless thing while develop
+trash/
+*.txt
+
 # C extensions
 *.so
 
