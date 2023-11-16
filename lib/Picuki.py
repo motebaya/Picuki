@@ -35,27 +35,26 @@ class Picuki(AsyncClient):
                 page.text,
                 info.groupdict()
             )
-
-        soup = Helper.parse(page.text)
-        """
-        do with bs4 if regex can't find it
-        """
-        if soup.find('div', class_='profile-info'):
-            return (page.text, dict(zip(
-                ('username', 'full_name',
-                 'bio', 'total_posts',
-                 'followers', 'following'),
-                    (soup.find(class_=i).text.strip() for i in (
-                        "profile-name-top", "profile-name-bottom",
-                        "profile-description", "total_posts",
-                        "followed_by", "follows"))
-                    )
-                ))
-
-        """
-        return nothing if profile not found
-        """
-        return None
+        else:
+            soup = Helper.parse(page.text)
+            """
+            do with bs4 if regex can't find it
+            """
+            if soup.find('div', class_='profile-info'):
+                return (page.text, dict(zip(
+                    ('username', 'full_name',
+                     'bio', 'total_posts',
+                     'followers', 'following'),
+                        (soup.find(class_=i).text.strip() for i in (
+                            "profile-name-top", "profile-name-bottom",
+                            "profile-description", "total_posts",
+                            "followed_by", "follows"))
+                        )
+                    ))
+            """
+            return nothing if profile not found
+            """
+            return None
 
     async def get_media_id(
         self,
