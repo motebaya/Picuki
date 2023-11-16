@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-# author: @github.com/motebaya
-# Copyright 2023.06.3 08:42:53 AM
-# file: __logger__
-
+"""
+Logger 
+@github.com/motebaya at 2023.06.3 - 08.42AM
+"""
 import logging
-# <-- logger / debug file -->
-logging.addLevelName(logging.WARNING, '\033[33mWarning\033[0m')
-logging.addLevelName(logging.DEBUG, '\033[32mdebug\033[0m')
-logging.addLevelName(logging.INFO, '\033[36minfo\033[0m')
+from colorama.ansi import Fore as col
 
+logging.addLevelName(logging.WARNING, f"{col.YELLOW}Warning{col.RESET}")
+logging.addLevelName(logging.ERROR, f"{col.RED}Error{col.RESET}")
+logging.addLevelName(logging.DEBUG, f"{col.GREEN}Debug{col.RESET}")
+logging.addLevelName(logging.INFO, f"{col.CYAN}Info{col.RESET}")
+
+# default verbose -> off
 logging.basicConfig(
-    format="\033[0m %(asctime)s %(levelname)s:%(message)s ", level=logging.DEBUG, datefmt='%H:%M:%S')
+    format="\033[0m %(asctime)s %(levelname)s:%(message)s ", level=logging.INFO, datefmt='%H:%M:%S')
 logger = logging.getLogger(__name__)
