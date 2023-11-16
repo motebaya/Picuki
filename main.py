@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-main.py CLI - Handler
+main.py MODULE - Handler
 @github.com/motebaya
 update: 17.11.2023 - 8:00 PM 
 """
