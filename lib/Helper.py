@@ -10,10 +10,8 @@ from bs4 import BeautifulSoup
 from rich.console import Console
 from aiohttp import ClientSession
 from lib.logger import logger, col
-from pathlib import Path as PosixPath
-from typing import Dict, Union, Optional, Any
+from typing import Dict, Union, Optional, Any, Tuple
 import asyncio, random, re, aiofiles, json, os, logging
-from humanize import naturalsize as get_natural_sizes
 from rich.progress import (
     Progress, 
     SpinnerColumn, 
@@ -147,6 +145,31 @@ class Helper:
                 border_style="blue"
             )
         )
+    
+    @staticmethod
+    async def compareLength(targetDir: str, currentLength: int) -> Union[str, bool]:
+        """compare content length before iterate chunk to check alrdy downloaded or not.
+        in general, different file size == different content.
+
+        test with 2k+ of files it fastly: -0.2 sec, and average: -1.5 sec.
+        dpend the CPU machine.
+
+        :param str targetDir: dir target to iterate.
+        :param int currentLength: current length before downloaded.
+        :return bool
+        """
+        async def compare(file: str) -> Tuple[str, int]:
+            return (file, await asyncio.to_thread(os.path.getsize, file))
+
+        recursSize = await asyncio.gather(
+            *map(lambda x: compare(f"{targetDir}/{x}"), os.listdir(targetDir)))    
+        for file, size in recursSize:
+            if size == currentLength:
+                return file
+            else:
+                continue
+        return False
+
 
     @staticmethod
     async def _downloadContent(**kwargs: Dict[str, str]) -> None:
@@ -156,7 +179,7 @@ class Helper:
         :kwrags.url: str: target url.
         :kwargs.username: str/optional: username for create new folder.
         :kwargs.type: str: the type media want to downloaded.
-        """        
+        """
         urlContent = kwargs.get('url')
         username = kwargs.get('username')
         assert urlContent is not None, "stopped, nothing url to download!"
@@ -195,10 +218,18 @@ class Helper:
                 """
                 extension = response.headers.get('Content-Type')
                 if not extension:
-                    logger.error(f"ValueError: Cannot get mimetype of content: {urlContent}")
+                    logger.error(f"{col.RED}ValueError: Cannot get mimetype of content: {urlContent}{col.RESET}")
                     return
 
                 filename = "{}.{}".format(filename, extension.split('/')[-1])
+                currentLength = int(response.headers.get('content-length', 0))
+                if (downloaded := await Helper.compareLength(
+                    os.path.dirname(filename),
+                    currentLength
+                )):
+                    logger.warning(f"Skip:: {col.YELLOW}{os.path.basename(filename)}{col.RESET}, Already Downloaded! as {col.GREEN}{downloaded}")
+                    return
+
                 if not os.path.exists(filename):
                     async with aiofiles.open(filename, "wb") as f:
                         with Progress(
@@ -214,9 +245,7 @@ class Helper:
                             console=Console(),
                             transient=True
                         ) as progress:
-                            task = progress.add_task(
-                                "[green] Downloading..", total=int(response.headers.get('content-length', 0))
-                            )
+                            task = progress.add_task("[green] Downloading..", total=currentLength)
                             async for content in response.content.iter_chunks():
                                 await f.write(
                                     content[0]
@@ -226,8 +255,8 @@ class Helper:
                                 )
                             await f.close()
                             progress.stop()
-                    Console().print(f"[green] Completed..saved as: [blue]{filename}")
+                    Console().print(f"[green] Completed..saved as: [blue]{filename}[reset]")
                 else:
-                    Console().print(f"[green] SKipping.. [blue]{filename} [green] file exist!")
+                    Console().print(f"[green] SKipping.. [blue]{filename} [green] file exist![reset]")
 
 
