@@ -124,7 +124,9 @@ class Main:
                         for i, cont in enumerate(targetContent, 1):
                             logger.info(f"Downloading {selected[0]}: {i} of {str(len(targetContent))}")
                             await Helper._downloadContent(
-                                url=cont,
+                                url=cont if isinstance(cont, str) \
+                                    else cont.get('url') if mediaType == "videos" \
+                                        else cont.get('thumbnail'),
                                 username=username,
                                 type=mediaType
                             )
