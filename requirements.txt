@@ -5,3 +5,4 @@ bs4==0.0.1
 httpx==0.24.1
 humanize==4.6.0
 rich==13.4.2
+colorama==0.4.6
