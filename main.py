@@ -155,7 +155,7 @@ class Main:
             webpage, profileInfo = await Main.getProfileInfo(username)
             Helper.show_table(profileInfo, title=f"{username!r}")
             # dump media id
-            contentMediaID = await Main.getMediaId(webpage, int(profileInfo.get('total_posts')))
+            contentMediaID = await Main.getMediaId(webpage, int(profileInfo.get('total_posts').replace(',', '')))
             Helper.show_table(contentMediaID.copy())
             mediaID = contentMediaID.get('mediaID')
             print(mediaID, len(mediaID))
