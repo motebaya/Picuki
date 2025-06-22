@@ -1,6 +1,13 @@
 <div align="center">
     <h2>Picuki</h2>
 
+# ** PICUKI FOR INSTAGRAM IS NO LONGER AVAILABLE.**
+![image](https://github.com/user-attachments/assets/8f2e2045-6706-45de-9798-9fe1fb31a513)
+
+<small>https://www.picuki.com/page/about</small>
+
+
+
 ---
 
 Instagram bulk profile media downloader
